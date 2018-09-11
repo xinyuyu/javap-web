@@ -1,13 +1,14 @@
-package cn.edu.hust.dto;
+package cn.edu.hust.domain;
 
+import cn.edu.hust.dto.RangeInfo;
 import lombok.Data;
 
 @Data
-public class BlockInfoDto {
+public class BlockInfo {
     RangeInfo rangeInfo;
-    BlockInfoDto[] nexts;
+    BlockInfo[] nexts;
 
-    public BlockInfoDto(RangeInfo rangeInfo, BlockInfoDto[] nexts) {
+    public BlockInfo(RangeInfo rangeInfo, BlockInfo[] nexts) {
         this.rangeInfo = rangeInfo;
         this.nexts = nexts;
     }

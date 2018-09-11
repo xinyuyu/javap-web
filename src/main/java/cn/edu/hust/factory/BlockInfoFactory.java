@@ -1,42 +1,50 @@
 package cn.edu.hust.factory;
 
-import cn.edu.hust.dto.BlockInfoDto;
+import cn.edu.hust.domain.BlockInfo;
 import cn.edu.hust.dto.RangeInfo;
+import cn.edu.hust.engine.utils.Bytes;
+import cn.edu.hust.service.wrap.ClassFileBlockUtil;
 
 public class BlockInfoFactory {
-    public static BlockInfoDto getBlockInfoDto(RangeInfo rangeInfo) {
-        return new BlockInfoDto(rangeInfo, new BlockInfoDto[0]);
+    public static BlockInfo getBlockInfo(RangeInfo rangeInfo) {
+        return new BlockInfo(rangeInfo, new BlockInfo[0]);
     }
 
-    public static BlockInfoDto getBlockInfoDto(RangeInfo rangeInfo, BlockInfoDto blockInfoDto) {
-        BlockInfoDto[] nexts = new BlockInfoDto[1];
-        nexts[0] = blockInfoDto;
-        BlockInfoDto result = getBlockInfoDto(rangeInfo);
+    public static BlockInfo getBlockInfo(RangeInfo rangeInfo, BlockInfo BlockInfo) {
+        BlockInfo[] nexts = new BlockInfo[1];
+        nexts[0] = BlockInfo;
+        BlockInfo result = getBlockInfo(rangeInfo);
         result.setNexts(nexts);
         return result;
     }
 
-    public static BlockInfoDto getBlockInfoDto(RangeInfo rangeInfo, RangeInfo nextRangeInfo) {
-        BlockInfoDto[] nexts = new BlockInfoDto[1];
-        nexts[0] = getBlockInfoDto(nextRangeInfo);
-        BlockInfoDto result = getBlockInfoDto(rangeInfo);
+    public static BlockInfo getBlockInfo(RangeInfo rangeInfo, RangeInfo nextRangeInfo) {
+        BlockInfo[] nexts = new BlockInfo[1];
+        nexts[0] = getBlockInfo(nextRangeInfo);
+        BlockInfo result = getBlockInfo(rangeInfo);
         result.setNexts(nexts);
         return result;
     }
 
-    public static BlockInfoDto getBlockInfoDto(RangeInfo rangeInfo, BlockInfoDto blockInfoDto1, BlockInfoDto blockInfoDto2) {
-        BlockInfoDto[] nexts = new BlockInfoDto[2];
-        nexts[0] = blockInfoDto1;
-        nexts[1] = blockInfoDto2;
-        BlockInfoDto result = getBlockInfoDto(rangeInfo);
+    public static BlockInfo getBlockInfo(RangeInfo rangeInfo, BlockInfo BlockInfo1, BlockInfo BlockInfo2) {
+        BlockInfo[] nexts = new BlockInfo[2];
+        nexts[0] = BlockInfo1;
+        nexts[1] = BlockInfo2;
+        BlockInfo result = getBlockInfo(rangeInfo);
         result.setNexts(nexts);
         return result;
     }
 
-    public static BlockInfoDto getBlockInfoDto(RangeInfo rangeInfo, BlockInfoDto [] blockInfoDto) {
-        BlockInfoDto result = getBlockInfoDto(rangeInfo);
-        result.setNexts(blockInfoDto);
+    public static BlockInfo getBlockInfo(RangeInfo rangeInfo, BlockInfo[] BlockInfo) {
+        BlockInfo result = getBlockInfo(rangeInfo);
+        result.setNexts(BlockInfo);
         return result;
+    }
+
+    public static BlockInfo getBlockInfo(RangeInfo rangeInfo, byte[] data, int[] pool) {
+        int offset = Bytes.toInt(data, rangeInfo.getStart(), rangeInfo.getEnd());
+        BlockInfo constantItemBlock = ClassFileBlockUtil.getConstantItemBlock(data, pool, offset);
+        return getBlockInfo(rangeInfo, constantItemBlock);
     }
 
 }
