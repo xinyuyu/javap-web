@@ -12,4 +12,12 @@ public interface Description {
     String LVT_ATT_LENGTH = "LocalVariableTable length";
     String LVT_ATT_TABLE_LENGTH = "LocalVariableTable table length";
     String LVT_ATT_INFO = "LocalVariableTable local variable info";
+
+    String LNI_START_PC = "LineNumberInfo start pc";
+    String LNI_LINE_NUMBER = "LineNumberInfo line number";
+
+    String LNT_ATT_NAME_INDEX = "LineNumberTable attribute name index";
+    String LNT_ATT_LENGTH = "LineNumberTable attribute length";
+    String LNT_NUMBER_TABLE_LENGTH = "line number table length";
+    String LNT_LINE_NUMBER_TABLE = "line number table";
 }

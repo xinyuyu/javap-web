@@ -33,6 +33,7 @@ public class LocalVariableTable {
             localVariableInfoArr[i] = new LocalVariableInfo(data, pool, offset + 8);
             offset +=  localVariableInfoArr[i].getLocalVariableInfoLength(data);
         }
+        init(attributeNameIndex, attributeLength, localVariableTableLength, localVariableInfoArr);
     }
 
     public int getLocalVariableTableLength(byte[] data) {
