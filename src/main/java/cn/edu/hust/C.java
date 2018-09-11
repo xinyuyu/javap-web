@@ -6,6 +6,7 @@ public class C {
     public void m(){
         System.out.println("this is C's m");
     }
+    public void y(){}
 
     @Override
     public String toString() {
