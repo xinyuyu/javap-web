@@ -1,13 +1,16 @@
 package cn.edu.hust.service.wrap;
 
 
+import cn.edu.hust.domain.Attribute;
 import cn.edu.hust.domain.BlockInfo;
+import cn.edu.hust.domain.FieldInfo;
 import cn.edu.hust.dto.RangeInfo;
 import cn.edu.hust.engine.api.ClassFile;
 import cn.edu.hust.engine.api.Tag;
 import cn.edu.hust.engine.utils.Bytes;
 import cn.edu.hust.factory.BlockInfoFactory;
 import cn.edu.hust.factory.RangeInfoFactory;
+import cn.edu.hust.utils.TransUtils;
 
 import java.io.*;
 import java.util.*;
@@ -240,6 +243,25 @@ public class ClassFileBlockUtil {
         return BlockInfoFactory.getBlockInfo(fieldRange, fieldsBlock);
     }
 
+    public static BlockInfo getFieldZoneBlockNew(byte[] data, int[] pool) throws IllegalAccessException {
+        int offset = ClassFile.getFieldsZoneOffset(data, pool) + 2;
+        int start = offset;
+        int filedCount = Bytes.toInt(data, ClassFile.getFieldsZoneOffset(data, pool));
+        FieldInfo[] fieldInfoArr = new FieldInfo[filedCount];
+        List<BlockInfo> allBlocksInField = new ArrayList<>();
+        for (int i = 0; i < filedCount; i++) {
+            fieldInfoArr[i] = new FieldInfo(data, pool, offset);
+            allBlocksInField.addAll(TransUtils.fieldTransToBlockInfo(fieldInfoArr[i]));
+            offset += fieldInfoArr[i].getLength(data);
+        }
+        RangeInfo fieldBlockIndex = RangeInfoFactory.getRangeInfo(start, offset, "Field zone");
+        BlockInfo [] blockInfoArr = new BlockInfo[allBlocksInField.size()];
+        allBlocksInField.toArray(blockInfoArr);
+        BlockInfo fieldBlock = BlockInfoFactory.getBlockInfo(fieldBlockIndex,blockInfoArr);
+        System.out.println(fieldInfoArr);
+        return null;
+    }
+
     public static List<BlockInfo> getClassFileBlockInfo(byte[] data, int[] pool) {
         List<BlockInfo> list = new ArrayList<>();
 
@@ -305,12 +327,12 @@ public class ClassFileBlockUtil {
         return result;
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, IllegalAccessException {
         InputStream in = new FileInputStream(new File(ClassFileBlockUtil.class.getResource("/").getPath() + "C.class"));
         byte[] data = new byte[1024 * 10];
         in.read(data);
         int[] pool = ClassFile.getConstantPool(data);
-
+        getFieldZoneBlockNew(data, pool);
 //        System.out.println(ClassFileBlockUtil.getMagicBlock());
 //        System.out.println(ClassFileBlockUtil.getVersionBlock(data));
 //        System.out.println(ClassFileBlockUtil.getPoolSizeBlock(pool));
