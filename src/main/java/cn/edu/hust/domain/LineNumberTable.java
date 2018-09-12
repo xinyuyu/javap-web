@@ -10,23 +10,12 @@ import lombok.Data;
 
 
 @Data
-public class LineNumberTable {
-    private BlockInfo attributeNameIndex; // u2
-    private RangeInfo attributeLength; //u4
+public class LineNumberTable extends Attribute {
     private RangeInfo lineNumberTableLength; //u2
     private LineNumberInfo[] lineNumberArr; //u2
 
-    private void init(BlockInfo attributeNameIndex, RangeInfo attributeLength, RangeInfo lineNumberTableLength, LineNumberInfo[] lineNumberArr) {
-        this.attributeNameIndex = attributeNameIndex;
-        this.attributeLength = attributeLength;
-        this.lineNumberTableLength = lineNumberTableLength;
-        this.lineNumberArr = lineNumberArr;
-    }
-
-    public LineNumberTable(byte[] data, int offset) {
-        RangeInfo attributeNameIndexRangeInfo = RangeInfoFactory.getRangeInfo(offset, Description.LNT_ATT_NAME_INDEX);
-        BlockInfo attributeNameIndex = BlockInfoFactory.getBlockInfo(attributeNameIndexRangeInfo);
-        RangeInfo attributeLength = RangeInfoFactory.getRangeInfo(offset + 2, Description.LNT_ATT_LENGTH);
+    public LineNumberTable(byte[] data, int[] pool, int offset) {
+        super(data,pool, offset);
         RangeInfo lineNumberTableLength = RangeInfoFactory.getRangeInfo(offset + 6, Description.LNT_NUMBER_TABLE_LENGTH);
         int arrlength = Bytes.toInt(data, lineNumberTableLength.getStart(), lineNumberTableLength.getEnd());
         LineNumberInfo[] lineNumberArr = new LineNumberInfo[arrlength];
@@ -34,11 +23,13 @@ public class LineNumberTable {
             lineNumberArr[i] = new LineNumberInfo(data, offset);
             offset += 4;
         }
-        init(attributeNameIndex, attributeLength, lineNumberTableLength, lineNumberArr);
+        this.lineNumberTableLength = lineNumberTableLength;
+        this.lineNumberArr = lineNumberArr;
     }
 
-    public int getLineNumberTableLength(byte[] data) {
-        return Bytes.toInt(data, attributeLength.getStart(), attributeLength.getEnd()) + 2;
+    @Override
+    public long getLength(byte[] data) {
+        return Bytes.toInt(data, attributeLength.getStart(), attributeLength.getEnd()) + 2 + 4;
     }
 }
 
@@ -56,5 +47,9 @@ class LineNumberInfo {
         RangeInfo startPc = RangeInfoFactory.getRangeInfo(offset, Description.LNI_START_PC);
         RangeInfo lineNumber = RangeInfoFactory.getRangeInfo(offset, Description.LNI_LINE_NUMBER);
         init(startPc, lineNumber);
+    }
+
+    public int getLineNumberInfoLength() {
+        return 4;
     }
 }

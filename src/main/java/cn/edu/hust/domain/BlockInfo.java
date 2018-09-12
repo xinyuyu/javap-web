@@ -13,7 +13,15 @@ public class BlockInfo {
         this.nexts = nexts;
     }
 
-    public boolean inRange(int offset){
+    public int getRangeStart() {
+        return rangeInfo.getStart();
+    }
+
+    public int getRangeEnd() {
+        return rangeInfo.getEnd();
+    }
+
+    public boolean inRange(int offset) {
         return rangeInfo.inRange(offset);
     }
 }

@@ -42,8 +42,9 @@ public class BlockInfoFactory {
     }
 
     public static BlockInfo getBlockInfo(RangeInfo rangeInfo, byte[] data, int[] pool) {
-        int offset = Bytes.toInt(data, rangeInfo.getStart(), rangeInfo.getEnd());
-        BlockInfo constantItemBlock = ClassFileBlockUtil.getConstantItemBlock(data, pool, offset);
+        int offset = Bytes.toIntRange(data, rangeInfo.getStart(), rangeInfo.getEnd());
+        BlockInfo constantItemBlock = ClassFileBlockUtil.getConstantItemBlock(data, pool, pool[offset]);
+        constantItemBlock.getRangeInfo().setParent(rangeInfo.getStart());
         return getBlockInfo(rangeInfo, constantItemBlock);
     }
 

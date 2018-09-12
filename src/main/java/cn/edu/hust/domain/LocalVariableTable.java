@@ -8,36 +8,26 @@ import cn.edu.hust.factory.RangeInfoFactory;
 import lombok.Data;
 
 @Data
-public class LocalVariableTable {
-    private BlockInfo attributeNameIndex;
-    private RangeInfo attributeLength;
+public class LocalVariableTable extends Attribute {
     private RangeInfo localVariableTableLength;
     private LocalVariableInfo[] localVariableInfoArr;
 
-    private void init(BlockInfo attributeNameIndex, RangeInfo attributeLength, RangeInfo localVariableTableLength, LocalVariableInfo[] localVariableInfoArr) {
-        this.attributeNameIndex = attributeNameIndex; // u2
-        this.attributeLength = attributeLength; // u4
-        this.localVariableTableLength = localVariableTableLength; // u2
-        this.localVariableInfoArr = localVariableInfoArr;
-    }
-
     public LocalVariableTable(byte[] data, int[] pool, int offset) {
-        // 属性名字的索引
-        RangeInfo attributeNameIndexRangeInfo = RangeInfoFactory.getRangeInfo(offset, Description.LVT_ATT_NAME_INDEX);
-        BlockInfo attributeNameIndex = BlockInfoFactory.getBlockInfo(attributeNameIndexRangeInfo);
-        RangeInfo attributeLength = RangeInfoFactory.getRangeInfo(offset + 2, Description.LVT_ATT_LENGTH);
+        super(data, pool, offset);
         RangeInfo localVariableTableLength = RangeInfoFactory.getRangeInfo(offset + 6, Description.LVT_ATT_TABLE_LENGTH);
         int arrayLength = Bytes.toInt(data, localVariableTableLength.getStart(), localVariableTableLength.getEnd());
         LocalVariableInfo[] localVariableInfoArr = new LocalVariableInfo[arrayLength];
         for (int i = 0; i < arrayLength; i++) {
             localVariableInfoArr[i] = new LocalVariableInfo(data, pool, offset + 8);
-            offset +=  localVariableInfoArr[i].getLocalVariableInfoLength(data);
+            offset += localVariableInfoArr[i].getLocalVariableInfoLength(data);
         }
-        init(attributeNameIndex, attributeLength, localVariableTableLength, localVariableInfoArr);
+        this.localVariableTableLength = localVariableTableLength; // u2
+        this.localVariableInfoArr = localVariableInfoArr;
     }
 
-    public int getLocalVariableTableLength(byte[] data) {
-        return Bytes.toInt(data, attributeLength.getStart(), attributeLength.getEnd());
+    @Override
+    public long getLength(byte[] data) {
+        return Bytes.toInt(data, attributeLength.getStart(), attributeLength.getEnd()) + 2 + 4;
     }
 }
 
