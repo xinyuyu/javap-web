@@ -9,6 +9,7 @@ import cn.edu.hust.engine.api.ClassFile;
 import cn.edu.hust.engine.api.Tag;
 import cn.edu.hust.engine.utils.Bytes;
 import cn.edu.hust.factory.BlockInfoFactory;
+import cn.edu.hust.factory.FieldInfoFactory;
 import cn.edu.hust.factory.RangeInfoFactory;
 import cn.edu.hust.utils.TransUtils;
 
@@ -185,62 +186,7 @@ public class ClassFileBlockUtil {
     }
 
     public static BlockInfo getFieldZoneBlock(byte[] data, int[] pool) {
-        int fieldZoneStartOffset = ClassFile.getFieldsZoneOffset(data, pool) + 2;
-        int filedCount = Bytes.toInt(data, ClassFile.getFieldsZoneOffset(data, pool));
-        BlockInfo[] fieldsBlock = new BlockInfo[filedCount];
-        int fieldBlockInfoStart = fieldZoneStartOffset;
-        for (int i = 0; i < filedCount; i++) {
-            BlockInfo[] fieldCombox = new BlockInfo[5];
-            RangeInfo accessFlagRangeInfo = RangeInfoFactory.getRangeInfo(fieldZoneStartOffset, fieldZoneStartOffset + 1, "field access flag");
-            BlockInfo accessFlagBlockInfo = BlockInfoFactory.getBlockInfo(accessFlagRangeInfo);
-            fieldCombox[0] = accessFlagBlockInfo;
-
-            RangeInfo nameIndexRangeInfo = RangeInfoFactory.getRangeInfo(fieldZoneStartOffset + 2, fieldZoneStartOffset + 3, "field name index");
-            BlockInfo nameIndexUtf8Block = getConstantItemBlock(data, pool, pool[Bytes.toInt(data, fieldZoneStartOffset + 2)]);
-            BlockInfo nameIndexBlockInfo = BlockInfoFactory.getBlockInfo(nameIndexRangeInfo, nameIndexUtf8Block);
-            fieldCombox[1] = nameIndexBlockInfo;
-
-            RangeInfo descriptionIndexInfo = RangeInfoFactory.getRangeInfo(fieldZoneStartOffset + 4, fieldZoneStartOffset + 5, "description index");
-            BlockInfo descriptionIndexUtf8Block = getConstantItemBlock(data, pool, pool[Bytes.toInt(data, fieldZoneStartOffset + 4)]);
-            BlockInfo descriptionIndexBlockInfo = BlockInfoFactory.getBlockInfo(descriptionIndexInfo, descriptionIndexUtf8Block);
-            fieldCombox[2] = descriptionIndexBlockInfo;
-
-            RangeInfo attributeAccountRangeInfo = RangeInfoFactory.getRangeInfo(fieldZoneStartOffset + 6, fieldZoneStartOffset + 7, "attribute count");
-            BlockInfo attributeBlockInfo = BlockInfoFactory.getBlockInfo(attributeAccountRangeInfo);
-            fieldCombox[3] = attributeBlockInfo;
-
-            int attributeCount = Bytes.toInt(data, fieldZoneStartOffset + 6);
-            int attBlockInfoStart = fieldZoneStartOffset + 8;
-            BlockInfo[] attBlocks = new BlockInfo[attributeCount];
-            for (int j = 0; j < attributeCount; j++) {
-                BlockInfo[] attCombox = new BlockInfo[3];
-                RangeInfo attIndexNameRange = RangeInfoFactory.getRangeInfo(fieldZoneStartOffset + 8, fieldZoneStartOffset + 9, "attribute name");
-                BlockInfo attIndexNameUtf8Block = getConstantItemBlock(data, pool, fieldZoneStartOffset + 8);
-                BlockInfo attIndexNameBlock = BlockInfoFactory.getBlockInfo(attIndexNameRange, attIndexNameUtf8Block);
-                attCombox[0] = attIndexNameBlock;
-
-                RangeInfo attLengthRange = RangeInfoFactory.getRangeInfo(fieldZoneStartOffset + 10, fieldBlockInfoStart + 13, "attribute length");
-                BlockInfo attLengthBlock = BlockInfoFactory.getBlockInfo(attLengthRange);
-                attCombox[1] = attLengthBlock;
-
-                int attributesLength = Bytes.toInt(data, fieldZoneStartOffset + 10, 4);
-                RangeInfo attInfoRange = RangeInfoFactory.getRangeInfo(fieldZoneStartOffset + 14, fieldZoneStartOffset + 14 + attributesLength, "attribute info");
-                BlockInfo attInfoBlock = BlockInfoFactory.getBlockInfo(attInfoRange);
-                attCombox[2] = attInfoBlock;
-
-                fieldZoneStartOffset += (14 + attributesLength);
-                RangeInfo attRange = RangeInfoFactory.getRangeInfo(attBlockInfoStart, fieldZoneStartOffset, "filed attribute zone");
-                attBlocks[j] = BlockInfoFactory.getBlockInfo(attRange, attCombox);
-            }
-            RangeInfo attRange = RangeInfoFactory.getRangeInfo(attBlockInfoStart, fieldZoneStartOffset, "field attribute zone");
-            BlockInfo attBlockInfo = BlockInfoFactory.getBlockInfo(attRange, attBlocks);
-            fieldCombox[4] = attBlockInfo;
-
-            RangeInfo fieldRange = RangeInfoFactory.getRangeInfo(fieldBlockInfoStart, fieldZoneStartOffset, "field zone");
-            fieldsBlock[i] = BlockInfoFactory.getBlockInfo(fieldRange, fieldCombox);
-        }
-        RangeInfo fieldRange = RangeInfoFactory.getRangeInfo(fieldBlockInfoStart, fieldZoneStartOffset, "field zone");
-        return BlockInfoFactory.getBlockInfo(fieldRange, fieldsBlock);
+        return FieldInfoFactory.getFieldInfo(data, pool);
     }
 
     public static BlockInfo getFieldZoneBlockNew(byte[] data, int[] pool) throws IllegalAccessException {
@@ -282,8 +228,11 @@ public class ClassFileBlockUtil {
 
     public static Map<Integer, BlockInfo> offsetStartToBlockInfo(List<BlockInfo> list) {
         Map<Integer, BlockInfo> map = new HashMap<>();
-        for (BlockInfo BlockInfo : list) {
-            map.put(BlockInfo.getRangeInfo().getStart(), BlockInfo);
+        for (BlockInfo blockInfo : list) {
+            map.put(blockInfo.getRangeInfo().getStart(), blockInfo);
+            if (blockInfo.getNexts() != null && blockInfo.getNexts().length != 0){
+                map.putAll(offsetStartToBlockInfo(Arrays.asList(blockInfo.getNexts())));
+            }
         }
         return map;
     }

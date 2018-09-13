@@ -10,9 +10,10 @@ public class BlockInfoFactory {
         return new BlockInfo(rangeInfo, new BlockInfo[0]);
     }
 
-    public static BlockInfo getBlockInfo(RangeInfo rangeInfo, BlockInfo BlockInfo) {
+    public static BlockInfo getBlockInfo(RangeInfo rangeInfo, BlockInfo blockInfo) {
         BlockInfo[] nexts = new BlockInfo[1];
-        nexts[0] = BlockInfo;
+        nexts[0] = blockInfo;
+        blockInfo.getRangeInfo().setParent(rangeInfo.getStart());
         BlockInfo result = getBlockInfo(rangeInfo);
         result.setNexts(nexts);
         return result;
@@ -26,10 +27,10 @@ public class BlockInfoFactory {
         return result;
     }
 
-    public static BlockInfo getBlockInfo(RangeInfo rangeInfo, BlockInfo BlockInfo1, BlockInfo BlockInfo2) {
+    public static BlockInfo getBlockInfo(RangeInfo rangeInfo, BlockInfo blockInfo1, BlockInfo blockInfo2) {
         BlockInfo[] nexts = new BlockInfo[2];
-        nexts[0] = BlockInfo1;
-        nexts[1] = BlockInfo2;
+        nexts[0] = blockInfo1;
+        nexts[1] = blockInfo2;
         BlockInfo result = getBlockInfo(rangeInfo);
         result.setNexts(nexts);
         return result;
